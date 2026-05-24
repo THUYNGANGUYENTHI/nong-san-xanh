@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} - Nông Sản Xanh{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Breadcrumb -->
+    <nav class="text-sm text-gray-500 mb-6">
+        <a href="{{ url_for('index') }}" class="hover:text-green-brand-700 transition">Trang chủ</a>
+        <span class="mx-2">/</span>
+        {% if product.category %}
+        <a href="{{ url_for('index', category=product.category) }}" class="hover:text-green-brand-700 transition">{{ product.category }}</a>
+        <span class="mx-2">/</span>
+        {% endif %}
+        <span class="text-gray-700 font-medium">{{ product.name }}</span>
+    </nav>
+
+    <!-- Product Detail -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+            <!-- Image -->
+            <div class="relative bg-earth-50 flex items-center justify-center p-6 md:p-10">
+                <img src="{{ image_url(product.image) }}"
+                     alt="{{ product.name }}"
+                     class="max-w-full max-h-[450px] object-contain rounded-xl"
+                     onerror="this.src='https://placehold.co/500x500/e8d0b3/6d4a30?text={{ product.name[:8] }}'">
+                {% if product.stock <= 10 and product.stock > 0 %}
+                <span class="absolute top-4 left-4 bg-orange-500 text-white text-sm px-3 py-1 rounded-full font-medium shadow">⚡ Sắp hết hàng</span>
+                {% elif product.stock == 0 %}
+                <span class="absolute top-4 left-4 bg-red-500 text-white text-sm px-3 py-1 rounded-full font-medium shadow">Hết hàng</span>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div class="p-6 md:p-10 flex flex-col">
+                <div class="flex items-start justify-between gap-3 mb-2">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">{{ product.name }}</h1>
+                </div>
+
+                <div class="flex items-center gap-3 mb-4 text-sm text-gray-500">
+                    {% if product.category %}
+                    <span class="px-2.5 py-1 bg-green-brand-50 text-green-brand-700 rounded-full font-medium text-xs">{{ product.category }}</span>
+                    {% endif %}
+                    {% if product.origin %}
+                    <span><i class="fas fa-map-marker-alt text-earth-400 mr-1"></i>{{ product.origin }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Price -->
+                <div class="bg-green-brand-50 rounded-xl px-5 py-4 mb-6">
+                    <p class="text-3xl font-bold text-green-brand-700">
+                        {{ "{:,.0f}".format(product.price) }}<span class="text-base font-medium text-green-brand-500">đ / {{ product.unit }}</span>
+                    </p>
+                    <p class="text-sm text-green-brand-600 mt-1">
+                        <i class="fas fa-box mr-1"></i>Còn lại: <strong>{{ product.stock }} {{ product.unit }}</strong>
+                    </p>
+                </div>
+
+                <!-- Description -->
+                {% if product.description %}
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-info-circle text-green-brand-500 mr-1"></i>Mô tả sản phẩm</h3>
+                    <p class="text-gray-600 leading-relaxed text-sm">{{ product.description }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Add to cart -->
+                {% if product.stock > 0 %}
+                <form action="{{ url_for('cart_add', product_id=product.id) }}" method="POST" class="mt-auto">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="flex items-center gap-3 mb-4">
+                        <label class="text-sm font-medium text-gray-700">Số lượng:</label>
+                        <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                            <button type="button" onclick="changeQty(-1)" class="px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 transition">
+                                <i class="fas fa-minus text-xs"></i>
+                            </button>
+                            <input type="number" name="quantity" id="qty" value="1" min="1" max="{{ product.stock }}"
+                                   class="w-16 text-center py-2 border-x border-gray-300 outline-none text-sm font-medium">
+                            <button type="button" onclick="changeQty(1)" class="px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 transition">
+                                <i class="fas fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                        <span class="text-xs text-gray-400">(Tối đa {{ product.stock }})</span>
+                    </div>
+                    <button type="submit"
+                            class="w-full bg-green-brand-600 text-white py-3.5 rounded-xl font-semibold hover:bg-green-brand-700 transition shadow-md hover:shadow-lg text-base">
+                        <i class="fas fa-cart-plus mr-2"></i>Thêm vào giỏ hàng
+                    </button>
+                </form>
+                {% else %}
+                <div class="mt-auto bg-red-50 text-red-600 text-center py-3.5 rounded-xl font-semibold border border-red-200">
+                    <i class="fas fa-ban mr-2"></i>Sản phẩm tạm hết hàng
+                </div>
+                {% endif %}
+
+                <!-- Trust badges -->
+                <div class="flex items-center gap-4 mt-5 pt-5 border-t border-gray-100 text-xs text-gray-400">
+                    <span><i class="fas fa-leaf text-green-brand-400 mr-1"></i>Hữu cơ</span>
+                    <span><i class="fas fa-truck text-blue-400 mr-1"></i>Giao nhanh 24h</span>
+                    <span><i class="fas fa-shield-halved text-yellow-400 mr-1"></i>An toàn</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Recommendations - Gợi ý sản phẩm thông minh (TF-IDF Cosine Similarity) -->
+    <div id="recommendations" class="mt-10">
+        <h2 class="text-xl font-bold text-gray-800 mb-2">
+            <i class="fas fa-wand-magic-sparkles text-green-brand-500 mr-2"></i>Gợi ý sản phẩm tương tự
+        </h2>
+        <p class="text-sm text-gray-400 mb-6">Được phân tích bởi AI dựa trên mô tả sản phẩm (TF-IDF & Cosine Similarity)</p>
+        <div id="rec-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div class="col-span-full text-center py-8 text-gray-300">
+                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                <p class="text-sm">Đang phân tích...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function changeQty(delta) {
+    const input = document.getElementById('qty');
+    let val = parseInt(input.value) + delta;
+    const max = parseInt(input.max);
+    if (val < 1) val = 1;
+    if (val > max) val = max;
+    input.value = val;
+}
+
+// Load AI Recommendations
+document.addEventListener('DOMContentLoaded', function() {
+    const productId = {{ product.id }};
+    const grid = document.getElementById('rec-grid');
+
+    fetch(`/api/recommendations/${productId}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-300"><i class="fas fa-seedling text-3xl mb-2"></i><p class="text-sm">Không tìm thấy sản phẩm tương tự</p></div>';
+                return;
+            }
+            grid.innerHTML = data.map(p => `
+                <div class="product-card bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 flex flex-col" style="transition: all 0.3s ease;">
+                    <a href="/product/${p.id}" class="block relative overflow-hidden aspect-square">
+                        <img src="${p.image}"
+                             alt="${p.name}"
+                             class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                             onerror="this.src='https://placehold.co/400x400/e8d0b3/6d4a30?text=${encodeURIComponent(p.name.substring(0,6))}'">
+                        <span class="absolute top-2 right-2 bg-green-600/90 text-white text-xs px-2 py-0.5 rounded-full font-medium">${p.category}</span>
+                        <span class="absolute bottom-2 left-2 bg-purple-600/90 text-white text-xs px-2 py-0.5 rounded-full font-medium"><i class="fas fa-robot mr-1"></i>AI gợi ý</span>
+                    </a>
+                    <div class="p-3 md:p-4 flex-1 flex flex-col">
+                        <a href="/product/${p.id}" class="text-sm font-semibold text-gray-800 hover:text-green-700 transition line-clamp-2 mb-1">${p.name}</a>
+                        ${p.origin ? `<p class="text-xs text-gray-400 mb-2"><i class="fas fa-map-marker-alt mr-1"></i>${p.origin}</p>` : ''}
+                        <div class="mt-auto flex items-end justify-between pt-2">
+                            <p class="text-lg font-bold text-green-700">${Number(p.price).toLocaleString('vi-VN')}<span class="text-xs font-normal text-gray-400">đ/${p.unit}</span></p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        })
+        .catch(() => {
+            grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-300"><p class="text-sm">Không thể tải gợi ý</p></div>';
+        });
+});
+</script>
+{% endblock %}

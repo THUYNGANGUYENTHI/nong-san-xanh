@@ -1,0 +1,32 @@
+{% extends 'seller/base_seller.html' %}
+{% block title %}Seller Dashboard{% endblock %}
+
+{% block seller_content %}
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+    <h1 class="text-xl font-bold text-gray-800 mb-4">Tổng quan người bán</h1>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="rounded-xl border border-green-100 bg-green-50 p-4">
+            <p class="text-sm text-gray-600">Tổng sản phẩm</p>
+            <p class="text-2xl font-bold text-green-brand-700">{{ total_products }}</p>
+        </div>
+        <div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
+            <p class="text-sm text-gray-600">Sản phẩm đang hiển thị</p>
+            <p class="text-2xl font-bold text-blue-700">{{ visible_products }}</p>
+        </div>
+        <div class="rounded-xl border border-amber-100 bg-amber-50 p-4">
+            <p class="text-sm text-gray-600">Đơn mới cần xử lý</p>
+            <p class="text-2xl font-bold text-amber-700">{{ new_order_items }}</p>
+        </div>
+    </div>
+    <div class="mt-6 flex flex-wrap gap-3">
+        <a href="{{ url_for('seller_products') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-brand-600 text-white text-sm font-medium hover:bg-green-brand-700 transition">
+            <i class="fas fa-box-open"></i> Quản lý sản phẩm
+        </a>
+        <a href="{{ url_for('seller_orders') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition">
+            <i class="fas fa-clipboard-list"></i> Quản lý đơn hàng
+        </a>
+    </div>
+</div>
+{% endblock %}

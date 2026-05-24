@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <aside class="lg:col-span-3 bg-white rounded-xl border border-gray-100 shadow-sm p-4 h-fit">
+            <h2 class="text-lg font-bold text-green-brand-700 mb-4">Seller Panel</h2>
+            <nav class="space-y-2 text-sm">
+                <a href="{{ url_for('seller_dashboard') }}"
+                   class="block px-3 py-2 rounded-lg {% if request.endpoint == 'seller_dashboard' %}bg-green-brand-100 text-green-brand-800 font-semibold{% else %}text-gray-700 hover:bg-green-brand-50{% endif %}">
+                    <i class="fas fa-chart-line mr-2"></i>Tổng quan
+                </a>
+                <a href="{{ url_for('seller_products') }}"
+                   class="block px-3 py-2 rounded-lg {% if request.endpoint in ['seller_products', 'seller_product_add', 'seller_product_edit'] %}bg-green-brand-100 text-green-brand-800 font-semibold{% else %}text-gray-700 hover:bg-green-brand-50{% endif %}">
+                    <i class="fas fa-box-open mr-2"></i>Sản phẩm của tôi
+                </a>
+                <a href="{{ url_for('seller_orders') }}"
+                   class="block px-3 py-2 rounded-lg {% if request.endpoint in ['seller_orders', 'seller_order_detail'] %}bg-green-brand-100 text-green-brand-800 font-semibold{% else %}text-gray-700 hover:bg-green-brand-50{% endif %}">
+                    <i class="fas fa-clipboard-list mr-2"></i>Đơn hàng của tôi
+                </a>
+                <a href="{{ url_for('seller_reports') }}"
+                   class="block px-3 py-2 rounded-lg {% if request.endpoint == 'seller_reports' %}bg-green-brand-100 text-green-brand-800 font-semibold{% else %}text-gray-700 hover:bg-green-brand-50{% endif %}">
+                    <i class="fas fa-chart-bar mr-2"></i>Báo cáo bán hàng
+                </a>
+                <a href="{{ url_for('seller_after_sales') }}"
+                   class="block px-3 py-2 rounded-lg {% if request.endpoint in ['seller_after_sales', 'seller_review_reply', 'seller_return_update'] %}bg-green-brand-100 text-green-brand-800 font-semibold{% else %}text-gray-700 hover:bg-green-brand-50{% endif %}">
+                    <i class="fas fa-undo-alt mr-2"></i>Sau bán
+                </a>
+                <a href="{{ url_for('seller_ai') }}"
+                   class="block px-3 py-2 rounded-lg {% if request.endpoint == 'seller_ai' %}bg-green-brand-100 text-green-brand-800 font-semibold{% else %}text-gray-700 hover:bg-green-brand-50{% endif %}">
+                    <i class="fas fa-robot mr-2"></i>AI Seller
+                </a>
+            </nav>
+        </aside>
+        <div class="lg:col-span-9">
+            {% block seller_content %}{% endblock %}
+        </div>
+    </div>
+</section>
+{% endblock %}

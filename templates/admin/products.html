@@ -1,0 +1,97 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Quản lý sản phẩm - Admin{% endblock %}
+{% block page_title %}Quản lý sản phẩm{% endblock %}
+
+{% block admin_content %}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+    <p class="text-gray-500 text-sm">Tổng cộng <span class="font-semibold text-gray-700">{{ products|length }}</span> sản phẩm</p>
+    <a href="{{ url_for('admin_product_add') }}"
+       class="inline-flex items-center gap-2 bg-green-brand-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-brand-700 transition font-medium text-sm shadow-sm">
+        <i class="fas fa-plus"></i> Thêm sản phẩm
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b">
+                <tr class="text-left text-gray-500">
+                    <th class="px-4 py-3 font-medium">Ảnh</th>
+                    <th class="px-4 py-3 font-medium">Tên sản phẩm</th>
+                    <th class="px-4 py-3 font-medium">Danh mục</th>
+                    <th class="px-4 py-3 font-medium">Giá</th>
+                    <th class="px-4 py-3 font-medium">Tồn kho</th>
+                    <th class="px-4 py-3 font-medium">Trạng thái</th>
+                    <th class="px-4 py-3 font-medium text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y">
+                {% for product in products %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3">
+                        <img src="{{ image_url(product.image) }}"
+                             alt="{{ product.name }}"
+                             class="w-12 h-12 object-cover rounded-lg border"
+                             onerror="this.src='https://placehold.co/100x100/e8d0b3/6d4a30?text=🌿'">
+                    </td>
+                    <td class="px-4 py-3">
+                        <p class="font-medium text-gray-800">{{ product.name }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ product.origin or '—' }}</p>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 bg-green-brand-50 text-green-brand-700 rounded text-xs font-medium">{{ product.category or '—' }}</span>
+                    </td>
+                    <td class="px-4 py-3 font-medium text-earth-700">{{ "{:,.0f}".format(product.price) }}đ/{{ product.unit }}</td>
+                    <td class="px-4 py-3">
+                        {% if product.stock <= 10 %}
+                            <span class="text-red-600 font-semibold">{{ product.stock }}</span>
+                            <span class="text-xs text-red-400 ml-1">⚠ Sắp hết</span>
+                        {% else %}
+                            <span class="text-gray-700">{{ product.stock }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        {% if product.is_visible %}
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Hiển thị</span>
+                        {% else %}
+                            <span class="px-2 py-1 bg-gray-200 text-gray-500 rounded-full text-xs font-medium">Đã ẩn</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{{ url_for('admin_product_edit', product_id=product.id) }}"
+                               class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ url_for('admin_product_toggle', product_id=product.id) }}" method="POST" class="inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit"
+                                        class="p-2 {{ 'text-yellow-600 hover:bg-yellow-50' if product.is_visible else 'text-green-600 hover:bg-green-50' }} rounded-lg transition"
+                                        title="{{ 'Ẩn' if product.is_visible else 'Hiện' }}">
+                                    <i class="fas {{ 'fa-eye-slash' if product.is_visible else 'fa-eye' }}"></i>
+                                </button>
+                            </form>
+                            <form action="{{ url_for('admin_product_delete', product_id=product.id) }}" method="POST" class="inline"
+                                  onsubmit="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if not products %}
+    <div class="text-center py-12 text-gray-400">
+        <i class="fas fa-box-open text-5xl mb-3"></i>
+        <p class="text-lg">Chưa có sản phẩm nào</p>
+        <a href="{{ url_for('admin_product_add') }}" class="text-green-brand-600 hover:underline text-sm mt-2 inline-block">Thêm sản phẩm đầu tiên →</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

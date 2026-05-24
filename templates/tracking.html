@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Theo dõi đơn #{{ order.id }} - Nông Sản Xanh{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <nav class="text-sm text-gray-500 mb-6">
+        <a href="{{ url_for('order_history') }}" class="hover:text-green-brand-700 transition">Đơn hàng</a>
+        <span class="mx-2">/</span>
+        <a href="{{ url_for('order_detail', order_id=order.id) }}" class="hover:text-green-brand-700 transition">#{{ order.id }}</a>
+        <span class="mx-2">/</span>
+        <span class="text-gray-700 font-medium">Theo dõi vận chuyển</span>
+    </nav>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">
+            <i class="fas fa-route text-blue-500 mr-2"></i>Theo dõi đơn #{{ order.id }}
+        </h1>
+        <p class="text-sm text-gray-500">Trạng thái đơn: <span class="font-semibold">{{ order.status }}</span></p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
+        {% for item in order.items %}
+        <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p class="font-semibold text-gray-800">{{ item.product_name }}</p>
+                    <p class="text-xs text-gray-400">Số lượng: {{ item.quantity }}</p>
+                </div>
+                {% set st = (item.shipment.status if item.shipment else item.seller_status) %}
+                {% if st == 'Đã giao' %}
+                <span class="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700 font-medium">{{ st }}</span>
+                {% elif st == 'Đang giao' %}
+                <span class="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-700 font-medium">{{ st }}</span>
+                {% else %}
+                <span class="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700 font-medium">{{ st }}</span>
+                {% endif %}
+            </div>
+
+            <div class="text-xs text-gray-600 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <p class="text-gray-400">Đơn vị vận chuyển</p>
+                    <p>{{ (item.shipment.carrier if item.shipment else item.shipping_carrier) or '---' }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-400">Mã vận đơn</p>
+                    <p class="font-mono">{{ (item.shipment.tracking_code if item.shipment else item.shipping_code) or '---' }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-400">Cập nhật</p>
+                    <p>
+                        {% if item.shipment and item.shipment.updated_at %}
+                        {{ item.shipment.updated_at.strftime('%d/%m/%Y %H:%M') }}
+                        {% elif item.shipping_updated_at %}
+                        {{ item.shipping_updated_at.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}---{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            {# Timeline #}
+            {% set steps = ['Chuẩn bị hàng', 'Đang giao', 'Đã giao'] %}
+            {% set current = item.shipment.status if item.shipment else 'Chuẩn bị hàng' %}
+            {% set idx = steps.index(current) if current in steps else 0 %}
+            <div class="flex items-center justify-between mt-4 px-2">
+                {% for i in range(3) %}
+                <div class="flex flex-col items-center {% if i < 2 %}flex-1{% endif %}">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
+                        {% if i <= idx %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-400{% endif %}">
+                        {{ i + 1 }}
+                    </div>
+                    <span class="text-xs mt-1 {% if i <= idx %}text-blue-700 font-medium{% else %}text-gray-400{% endif %}">{{ steps[i] }}</span>
+                </div>
+                {% if i < 2 %}
+                <div class="flex-1 h-0.5 mx-2 mt-[-14px] {% if i < idx %}bg-blue-500{% else %}bg-gray-200{% endif %}"></div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <a href="{{ url_for('order_detail', order_id=order.id) }}"
+       class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-green-brand-700 transition mt-6">
+        <i class="fas fa-arrow-left"></i> Quay lại chi tiết đơn hàng
+    </a>
+</div>
+{% endblock %}

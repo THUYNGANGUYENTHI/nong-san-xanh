@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% block title %}Nông Sản Xanh - Nông sản sạch từ thiên nhiên{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+<section class="relative bg-gradient-to-r from-green-brand-700 via-green-brand-600 to-green-brand-500 text-white overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+        <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <circle cx="20" cy="30" r="15" fill="white"/>
+            <circle cx="70" cy="60" r="20" fill="white"/>
+            <circle cx="90" cy="20" r="10" fill="white"/>
+        </svg>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 py-16 md:py-24 relative z-10">
+        <div class="max-w-2xl">
+            <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
+                Nông Sản Sạch<br>
+                <span class="text-green-brand-200">Từ Thiên Nhiên Việt Nam</span>
+            </h1>
+            <p class="text-green-brand-100 text-lg mb-8 leading-relaxed">
+                Tuyển chọn nông sản hữu cơ tươi ngon từ các vùng miền trên cả nước. 
+                An toàn, chất lượng, giao hàng tận nơi.
+            </p>
+            <div class="flex flex-wrap gap-3">
+                <a href="#products" class="bg-white text-green-brand-700 px-6 py-3 rounded-full font-semibold hover:bg-green-brand-50 transition shadow-lg">
+                    <i class="fas fa-shopping-basket mr-2"></i>Mua sắm ngay
+                </a>
+                <a href="{{ url_for('index', category='Trái cây') }}" class="border-2 border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-green-brand-700 transition">
+                    <i class="fas fa-apple-whole mr-2"></i>Trái cây mùa
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Wave divider -->
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,40 C360,80 720,0 1440,40 L1440,80 L0,80 Z" fill="#f0fdf4"/>
+        </svg>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex flex-wrap items-center gap-2">
+        <span class="text-sm text-gray-500 font-medium mr-1"><i class="fas fa-filter mr-1"></i>Danh mục:</span>
+        <a href="{{ url_for('index') }}"
+           class="px-4 py-1.5 rounded-full text-sm font-medium transition
+           {% if not current_category %}bg-green-brand-600 text-white shadow-sm{% else %}bg-white text-gray-600 border border-gray-200 hover:border-green-brand-300 hover:text-green-brand-700{% endif %}">
+            Tất cả
+        </a>
+        {% for cat in categories %}
+        <a href="{{ url_for('index', category=cat) }}"
+           class="px-4 py-1.5 rounded-full text-sm font-medium transition
+           {% if current_category == cat %}bg-green-brand-600 text-white shadow-sm{% else %}bg-white text-gray-600 border border-gray-200 hover:border-green-brand-300 hover:text-green-brand-700{% endif %}">
+            {% if cat == 'Rau lá' %}🥬{% elif cat == 'Rau củ' %}🥕{% elif cat == 'Trái cây' %}🍎{% elif cat == 'Ngũ cốc' %}🌾{% elif cat == 'Gia vị' %}🌶️{% elif cat == 'Nấm' %}🍄{% elif cat == 'Rau mầm' %}🌱{% else %}📦{% endif %}
+            {{ cat }}
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Search result info -->
+{% if search_query %}
+<div class="max-w-7xl mx-auto px-4 mb-4">
+    <div class="bg-white rounded-lg px-4 py-3 flex items-center justify-between border border-green-brand-200">
+        <p class="text-sm text-gray-600">
+            <i class="fas fa-search mr-1 text-green-brand-500"></i>
+            Kết quả tìm kiếm cho: <strong class="text-green-brand-700">"{{ search_query }}"</strong>
+            <span class="text-gray-400 ml-2">({{ products.total }} sản phẩm)</span>
+        </p>
+        <a href="{{ url_for('index') }}" class="text-sm text-red-500 hover:underline">✕ Xóa bộ lọc</a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Products Grid -->
+<section id="products" class="max-w-7xl mx-auto px-4 pb-12">
+    {% if products.items %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        {% for product in products.items %}
+        <div class="product-card bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
+            <!-- Image -->
+            <a href="{{ url_for('product_detail', product_id=product.id) }}" class="block relative overflow-hidden aspect-square">
+                <img src="{{ image_url(product.image) }}"
+                     alt="{{ product.name }}"
+                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                     onerror="this.src='https://placehold.co/400x400/e8d0b3/6d4a30?text={{ product.name[:6] }}'">
+                {% if product.stock <= 10 and product.stock > 0 %}
+                <span class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">Sắp hết</span>
+                {% elif product.stock == 0 %}
+                <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">Hết hàng</span>
+                {% endif %}
+                <span class="absolute top-2 right-2 bg-green-brand-600/90 text-white text-xs px-2 py-0.5 rounded-full font-medium">{{ product.category }}</span>
+            </a>
+            <!-- Info -->
+            <div class="p-3 md:p-4 flex-1 flex flex-col">
+                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="text-sm md:text-base font-semibold text-gray-800 hover:text-green-brand-700 transition line-clamp-2 mb-1">
+                    {{ product.name }}
+                </a>
+                {% if product.origin %}
+                <p class="text-xs text-gray-400 mb-2"><i class="fas fa-map-marker-alt mr-1"></i>{{ product.origin }}</p>
+                {% endif %}
+                <div class="mt-auto flex items-end justify-between pt-2">
+                    <div>
+                        <p class="text-lg md:text-xl font-bold text-green-brand-700">{{ "{:,.0f}".format(product.price) }}<span class="text-xs font-normal text-gray-400">đ/{{ product.unit }}</span></p>
+                    </div>
+                    {% if product.stock > 0 %}
+                    <form action="{{ url_for('cart_add', product_id=product.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="w-9 h-9 md:w-10 md:h-10 bg-green-brand-500 text-white rounded-full hover:bg-green-brand-600 transition shadow-sm flex items-center justify-center" title="Thêm vào giỏ">
+                            <i class="fas fa-cart-plus text-sm"></i>
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-xs text-red-400 font-medium">Hết hàng</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if products.pages > 1 %}
+    <div class="flex justify-center mt-10 gap-2">
+        {% if products.has_prev %}
+        <a href="{{ url_for('index', page=products.prev_num, category=current_category, q=search_query) }}"
+           class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-green-brand-50 transition">
+            <i class="fas fa-chevron-left mr-1"></i>Trước
+        </a>
+        {% endif %}
+
+        {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                <a href="{{ url_for('index', page=page_num, category=current_category, q=search_query) }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition
+                   {% if page_num == products.page %}bg-green-brand-600 text-white shadow-sm{% else %}bg-white border border-gray-300 hover:bg-green-brand-50{% endif %}">
+                    {{ page_num }}
+                </a>
+            {% else %}
+                <span class="px-2 py-2 text-gray-400">...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if products.has_next %}
+        <a href="{{ url_for('index', page=products.next_num, category=current_category, q=search_query) }}"
+           class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-green-brand-50 transition">
+            Sau<i class="fas fa-chevron-right ml-1"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- No products -->
+    <div class="text-center py-20">
+        <p class="text-6xl mb-4">🔍</p>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">Không tìm thấy sản phẩm</h3>
+        <p class="text-gray-400 mb-6">Thử tìm kiếm với từ khóa khác hoặc xem tất cả sản phẩm.</p>
+        <a href="{{ url_for('index') }}" class="bg-green-brand-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-brand-700 transition font-medium">
+            Xem tất cả sản phẩm
+        </a>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Features section -->
+<section class="bg-white border-t border-green-brand-100">
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div class="space-y-2">
+                <div class="w-14 h-14 bg-green-brand-100 rounded-full flex items-center justify-center mx-auto">
+                    <i class="fas fa-leaf text-green-brand-600 text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-gray-700 text-sm">100% Hữu Cơ</h4>
+                <p class="text-xs text-gray-400">Không thuốc trừ sâu, không hóa chất</p>
+            </div>
+            <div class="space-y-2">
+                <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                    <i class="fas fa-truck text-blue-600 text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-gray-700 text-sm">Giao Hàng Nhanh</h4>
+                <p class="text-xs text-gray-400">Giao tận nơi trong 24h</p>
+            </div>
+            <div class="space-y-2">
+                <div class="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
+                    <i class="fas fa-shield-halved text-yellow-600 text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-gray-700 text-sm">An Toàn</h4>
+                <p class="text-xs text-gray-400">Chứng nhận VietGAP</p>
+            </div>
+            <div class="space-y-2">
+                <div class="w-14 h-14 bg-earth-100 rounded-full flex items-center justify-center mx-auto">
+                    <i class="fas fa-handshake text-earth-600 text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-gray-700 text-sm">Giá Tốt</h4>
+                <p class="text-xs text-gray-400">Trực tiếp từ nông trại</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// AI-Powered Live Search with debounce
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+let debounceTimer;
+
+if (searchInput && searchResults) {
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            searchResults.classList.add('hidden');
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            fetch(`/api/search?q=${encodeURIComponent(query)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        searchResults.innerHTML = `
+                            <div class="p-4 text-center">
+                                <p class="text-sm text-gray-400">Không tìm thấy sản phẩm cho "<strong>${query}</strong>"</p>
+                                <p class="text-xs text-gray-300 mt-1">Thử: "đồ nấu canh chua", "trái cây ngọt", "vitamin c"</p>
+                            </div>`;
+                    } else {
+                        const header = `<div class="px-4 py-2 bg-green-50 border-b border-green-100 text-xs text-green-700 font-medium">
+                            <i class="fas fa-robot mr-1"></i>AI tìm thấy ${data.length} kết quả cho "${query}"
+                        </div>`;
+                        const items = data.map(p => `
+                            <a href="/product/${p.id}" class="flex items-center gap-3 px-4 py-3 hover:bg-green-50 transition border-b last:border-0">
+                                <img src="${p.image}" class="w-10 h-10 rounded-lg object-cover border"
+                                     onerror="this.src='https://placehold.co/80x80/e8d0b3/6d4a30?text=🌿'">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-800 truncate">${p.name}</p>
+                                    <p class="text-xs text-gray-400">${p.category || ''}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-semibold text-green-700 whitespace-nowrap">${Number(p.price).toLocaleString('vi-VN')}đ</span>
+                                    <span class="text-[10px] text-gray-400 block">/${p.unit}</span>
+                                </div>
+                            </a>
+                        `).join('');
+                        searchResults.innerHTML = header + items;
+                    }
+                    searchResults.classList.remove('hidden');
+                });
+        }, 300);
+    });
+
+    // Hide search results on click outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.add('hidden');
+        }
+    });
+
+    searchInput.addEventListener('focus', function() {
+        if (searchResults.innerHTML && this.value.trim().length >= 2) {
+            searchResults.classList.remove('hidden');
+        }
+    });
+}
+</script>
+{% endblock %}

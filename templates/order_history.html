@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Lịch sử đơn hàng - Nông Sản Xanh{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">
+        <i class="fas fa-box text-green-brand-500 mr-2"></i>Lịch sử đơn hàng
+    </h1>
+
+    {% if orders %}
+    <div class="space-y-4">
+        {% for order in orders %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-5 py-4 bg-gray-50 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <span class="font-bold text-green-brand-700 text-base">Đơn #{{ order.id }}</span>
+                    <span class="text-sm text-gray-400">{{ order.order_date.strftime('%d/%m/%Y %H:%M') }}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if order.status == 'Đang xử lý' %}
+                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">⏳ {{ order.status }}</span>
+                    {% elif order.status == 'Đang giao' %}
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">🚚 {{ order.status }}</span>
+                    {% elif order.status == 'Đã hoàn thành' %}
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">✅ {{ order.status }}</span>
+                    {% else %}
+                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">❌ {{ order.status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Items preview -->
+            <div class="px-5 py-4">
+                <div class="space-y-3">
+                    {% for item in order.items[:3] %}
+                    <div class="flex items-center gap-3 text-sm">
+                        <div class="w-12 h-12 bg-earth-50 rounded-lg flex items-center justify-center flex-shrink-0 border">
+                            <span class="text-xl">🌿</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-gray-700 truncate">{{ item.product_name }}</p>
+                            <p class="text-xs text-gray-400">{{ "{:,.0f}".format(item.product_price) }}đ x {{ item.quantity }}</p>
+                        </div>
+                        <span class="font-semibold text-gray-600 whitespace-nowrap">{{ "{:,.0f}".format(item.subtotal) }}đ</span>
+                    </div>
+                    {% endfor %}
+                    {% if order.items|length > 3 %}
+                    <p class="text-xs text-gray-400 pl-15">... và {{ order.items|length - 3 }} sản phẩm khác</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-5 py-3 bg-gray-50 border-t border-gray-100">
+                <p class="text-sm text-gray-500">
+                    Giao đến: <span class="text-gray-700">{{ order.shipping_address[:60] }}{% if order.shipping_address|length > 60 %}...{% endif %}</span>
+                </p>
+                <div class="flex items-center gap-4">
+                    <p class="font-bold text-green-brand-700 text-base">
+                        Tổng: {{ "{:,.0f}".format(order.total_amount) }}đ
+                    </p>
+                    <a href="{{ url_for('order_detail', order_id=order.id) }}"
+                       class="px-4 py-1.5 bg-green-brand-50 text-green-brand-700 rounded-lg text-sm font-medium hover:bg-green-brand-100 transition">
+                        Chi tiết →
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+        <p class="text-7xl mb-4">📦</p>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">Chưa có đơn hàng nào</h3>
+        <p class="text-gray-400 mb-6">Hãy bắt đầu mua sắm nông sản tươi ngon!</p>
+        <a href="{{ url_for('index') }}" class="bg-green-brand-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-brand-700 transition shadow-md">
+            <i class="fas fa-shopping-basket mr-2"></i>Khám phá sản phẩm
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

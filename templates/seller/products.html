@@ -1,0 +1,67 @@
+{% extends 'seller/base_seller.html' %}
+{% block title %}Sản phẩm của tôi{% endblock %}
+
+{% block seller_content %}
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+    <div class="flex items-center justify-between mb-5">
+        <h1 class="text-xl font-bold text-gray-800">Sản phẩm của tôi</h1>
+        <a href="{{ url_for('seller_product_add') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-brand-600 text-white text-sm font-medium hover:bg-green-brand-700 transition">
+            <i class="fas fa-plus"></i> Thêm sản phẩm
+        </a>
+    </div>
+
+    {% if products %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+            <thead>
+                <tr class="text-left text-gray-500 border-b">
+                    <th class="py-2 pr-4">Tên</th>
+                    <th class="py-2 pr-4">Giá</th>
+                    <th class="py-2 pr-4">Tồn kho</th>
+                    <th class="py-2 pr-4">Trạng thái</th>
+                    <th class="py-2">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr class="border-b border-gray-100">
+                    <td class="py-3 pr-4 font-medium text-gray-800">{{ product.name }}</td>
+                    <td class="py-3 pr-4">{{ "{:,.0f}".format(product.price) }}đ</td>
+                    <td class="py-3 pr-4">{{ product.stock }} {{ product.unit }}</td>
+                    <td class="py-3 pr-4">
+                        {% if product.is_visible %}
+                            <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">Hiển thị</span>
+                        {% else %}
+                            <span class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">Đang ẩn</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 space-x-2">
+                        <a href="{{ url_for('seller_product_edit', product_id=product.id) }}"
+                           class="inline-flex items-center px-3 py-1.5 rounded-md text-xs bg-blue-50 text-blue-700 hover:bg-blue-100">Sửa</a>
+                        <form action="{{ url_for('seller_product_toggle', product_id=product.id) }}" method="POST" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit"
+                                    class="inline-flex items-center px-3 py-1.5 rounded-md text-xs bg-amber-50 text-amber-700 hover:bg-amber-100">
+                                Ẩn/Hiện
+                            </button>
+                        </form>
+                        <form action="{{ url_for('seller_product_delete', product_id=product.id) }}" method="POST" class="inline"
+                              onsubmit="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit"
+                                    class="inline-flex items-center px-3 py-1.5 rounded-md text-xs bg-red-50 text-red-700 hover:bg-red-100">
+                                Xóa
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-500">Bạn chưa có sản phẩm nào.</p>
+    {% endif %}
+</div>
+{% endblock %}

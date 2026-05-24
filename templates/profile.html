@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Hồ sơ cá nhân - Nông Sản Xanh{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-green-brand-700 to-green-brand-500 px-6 py-6 text-white">
+            <h1 class="text-2xl font-bold"><i class="fas fa-user-circle mr-2"></i>Hồ sơ cá nhân</h1>
+            <p class="text-sm text-green-brand-100 mt-1">Quản lý thông tin tài khoản của bạn</p>
+        </div>
+
+        <div class="p-6 md:p-8 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-green-brand-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">Tên đăng nhập</p>
+                    <p class="font-semibold text-gray-800">{{ current_user.username }}</p>
+                </div>
+                <div class="bg-green-brand-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">Vai trò</p>
+                    <p class="font-semibold text-gray-800">{{ current_user.role }}</p>
+                </div>
+                <div class="bg-green-brand-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">Họ và tên</p>
+                    <p class="font-semibold text-gray-800">{{ current_user.full_name }}</p>
+                </div>
+                <div class="bg-green-brand-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">Email</p>
+                    <p class="font-semibold text-gray-800">{{ current_user.email }}</p>
+                </div>
+                <div class="bg-green-brand-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">Số điện thoại</p>
+                    <p class="font-semibold text-gray-800">{{ current_user.phone or 'Chưa cập nhật' }}</p>
+                </div>
+                <div class="bg-green-brand-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">Địa chỉ</p>
+                    <p class="font-semibold text-gray-800">{{ current_user.address or 'Chưa cập nhật' }}</p>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <a href="{{ url_for('profile_edit') }}"
+                   class="inline-flex items-center gap-2 bg-green-brand-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-brand-700 transition font-medium">
+                    <i class="fas fa-pen-to-square"></i>Chỉnh sửa hồ sơ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

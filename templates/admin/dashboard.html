@@ -1,0 +1,138 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Dashboard - Admin{% endblock %}
+{% block page_title %}Dashboard Tổng quan{% endblock %}
+
+{% block admin_content %}
+<!-- Thống kê -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Tổng sản phẩm -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-brand-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">Tổng sản phẩm</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ total_products }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-brand-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-carrot text-green-brand-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tổng đơn hàng -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">Tổng đơn hàng</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ total_orders }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-clipboard-list text-blue-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đơn chờ xử lý -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">Chờ xử lý</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ pending_orders }}</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-clock text-yellow-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doanh thu -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-earth-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">Doanh thu</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1">{{ "{:,.0f}".format(revenue) }}đ</p>
+            </div>
+            <div class="w-12 h-12 bg-earth-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-wallet text-earth-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions & Recent Orders -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">
+            <i class="fas fa-bolt text-yellow-500 mr-2"></i>Thao tác nhanh
+        </h3>
+        <div class="space-y-3">
+            <a href="{{ url_for('admin_product_add') }}"
+               class="flex items-center gap-3 px-4 py-3 bg-green-brand-50 text-green-brand-700 rounded-lg hover:bg-green-brand-100 transition font-medium text-sm">
+                <i class="fas fa-plus-circle"></i> Thêm sản phẩm mới
+            </a>
+            <a href="{{ url_for('admin_products') }}"
+               class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition font-medium text-sm">
+                <i class="fas fa-boxes-stacked"></i> Quản lý kho hàng
+            </a>
+            <a href="{{ url_for('admin_orders', status='Đang xử lý') }}"
+               class="flex items-center gap-3 px-4 py-3 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition font-medium text-sm">
+                <i class="fas fa-hourglass-half"></i> Đơn cần xử lý ({{ pending_orders }})
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-700">
+                <i class="fas fa-clock-rotate-left text-blue-500 mr-2"></i>Đơn hàng gần đây
+            </h3>
+            <a href="{{ url_for('admin_orders') }}" class="text-sm text-green-brand-600 hover:underline">Xem tất cả →</a>
+        </div>
+
+        {% if recent_orders %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-gray-500 border-b">
+                        <th class="pb-3 font-medium">Mã ĐH</th>
+                        <th class="pb-3 font-medium">Khách hàng</th>
+                        <th class="pb-3 font-medium">Tổng tiền</th>
+                        <th class="pb-3 font-medium">Trạng thái</th>
+                        <th class="pb-3 font-medium">Ngày</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    {% for order in recent_orders %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3">
+                            <a href="{{ url_for('admin_order_detail', order_id=order.id) }}" class="text-green-brand-600 font-semibold hover:underline">#{{ order.id }}</a>
+                        </td>
+                        <td class="py-3">{{ order.shipping_name }}</td>
+                        <td class="py-3 font-medium">{{ "{:,.0f}".format(order.total_amount) }}đ</td>
+                        <td class="py-3">
+                            {% if order.status == 'Đang xử lý' %}
+                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">{{ order.status }}</span>
+                            {% elif order.status == 'Đang giao' %}
+                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">{{ order.status }}</span>
+                            {% elif order.status == 'Đã hoàn thành' %}
+                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">{{ order.status }}</span>
+                            {% else %}
+                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">{{ order.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 text-gray-500">{{ order.order_date.strftime('%d/%m/%Y') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-gray-400">
+            <i class="fas fa-inbox text-4xl mb-2"></i>
+            <p>Chưa có đơn hàng nào</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

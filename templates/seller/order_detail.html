@@ -1,0 +1,92 @@
+{% extends 'seller/base_seller.html' %}
+{% block title %}Xử lý đơn hàng #{{ order.id }}{% endblock %}
+
+{% block seller_content %}
+<div class="space-y-5">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">Đơn hàng #{{ order.id }}</h1>
+                <p class="text-sm text-gray-500">
+                    Khách: {{ order.customer.full_name }} - {{ order.shipping_phone }}
+                </p>
+                <p class="text-xs text-gray-500 mt-1">{{ order.shipping_address }}</p>
+            </div>
+            <div class="text-sm">
+                <p class="text-gray-500">Tổng phần của shop</p>
+                <p class="text-lg font-bold text-green-brand-700">{{ "{:,.0f}".format(seller_total) }}đ</p>
+            </div>
+        </div>
+    </div>
+
+    {% if order.status == 'Đã hủy' %}
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-800">
+        <i class="fas fa-ban mr-1"></i>
+        Khách hàng đã hủy đơn hàng — không thể cập nhật trạng thái hay vận chuyển.
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+            {% if order.status == 'Đã hủy' %}Chi tiết sản phẩm (đơn đã hủy){% else %}Cập nhật trạng thái và vận chuyển theo từng sản phẩm{% endif %}
+        </h2>
+        <div class="space-y-4">
+            {% for item in seller_items %}
+            <div class="border border-gray-200 rounded-xl p-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <p class="font-semibold text-gray-800">{{ item.product_name }}</p>
+                        <p class="text-xs text-gray-500">
+                            SL: {{ item.quantity }} - Thành tiền: {{ "{:,.0f}".format(item.subtotal) }}đ
+                        </p>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700">{{ item.seller_status }}</span>
+                </div>
+                {% if order.status != 'Đã hủy' %}
+                <form action="{{ url_for('seller_order_item_update', item_id=item.id) }}" method="POST" class="mt-3 flex flex-col sm:flex-row gap-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="seller_status"
+                            class="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-green-brand-500 focus:ring-2 focus:ring-green-brand-200 outline-none">
+                        <option value="Đơn mới" {% if item.seller_status == 'Đơn mới' %}selected{% endif %}>Đơn mới</option>
+                        <option value="Đã xác nhận" {% if item.seller_status == 'Đã xác nhận' %}selected{% endif %}>Đã xác nhận</option>
+                        <option value="Đang chuẩn bị" {% if item.seller_status == 'Đang chuẩn bị' %}selected{% endif %}>Đang chuẩn bị</option>
+                        <option value="Đang giao" {% if item.seller_status == 'Đang giao' %}selected{% endif %}>Đang giao</option>
+                        <option value="Đã giao" {% if item.seller_status == 'Đã giao' %}selected{% endif %}>Đã giao</option>
+                    </select>
+                    <button type="submit"
+                            class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition">
+                        Cập nhật
+                    </button>
+                </form>
+                <form action="{{ url_for('seller_order_item_shipping_update', item_id=item.id) }}" method="POST" class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="text" name="shipping_carrier" value="{{ item.shipping_carrier or '' }}"
+                           placeholder="Đơn vị vận chuyển"
+                           class="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-green-brand-500 focus:ring-2 focus:ring-green-brand-200 outline-none">
+                    <input type="text" name="shipping_code" value="{{ item.shipping_code or '' }}"
+                           placeholder="Mã vận đơn"
+                           class="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-green-brand-500 focus:ring-2 focus:ring-green-brand-200 outline-none">
+                    <button type="submit"
+                            class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 transition">
+                        Lưu vận chuyển
+                    </button>
+                </form>
+                {% endif %}
+                {% if item.shipping_carrier and item.shipping_code %}
+                <p class="mt-2 text-xs text-gray-500">
+                    VC: {{ item.shipping_carrier }} | Mã: <span class="font-medium">{{ item.shipping_code }}</span>
+                    {% if item.shipping_updated_at %}
+                    | Cập nhật: {{ item.shipping_updated_at.strftime('%d/%m/%Y %H:%M') }}
+                    {% endif %}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <a href="{{ url_for('seller_orders') }}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-green-brand-700 transition">
+        <i class="fas fa-arrow-left"></i> Quay lại danh sách đơn hàng
+    </a>
+</div>
+{% endblock %}

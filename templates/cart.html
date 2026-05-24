@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Giỏ hàng - Nông Sản Xanh{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">
+        <i class="fas fa-shopping-cart text-green-brand-500 mr-2"></i>Giỏ hàng của bạn
+    </h1>
+
+    {% if items %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Cart items -->
+        <div class="lg:col-span-2 space-y-4">
+            {% for item in items %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex gap-4">
+                <!-- Image -->
+                <a href="{{ url_for('product_detail', product_id=item.product.id) }}" class="flex-shrink-0">
+                    <img src="{{ image_url(item.product.image) }}"
+                         alt="{{ item.product.name }}"
+                         class="w-20 h-20 md:w-24 md:h-24 object-cover rounded-lg border"
+                         onerror="this.src='https://placehold.co/100x100/e8d0b3/6d4a30?text=🌿'">
+                </a>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <a href="{{ url_for('product_detail', product_id=item.product.id) }}"
+                               class="font-semibold text-gray-800 hover:text-green-brand-700 transition text-sm md:text-base">
+                                {{ item.product.name }}
+                            </a>
+                            <p class="text-sm text-green-brand-600 font-medium mt-0.5">
+                                {{ "{:,.0f}".format(item.product.price) }}đ / {{ item.product.unit }}
+                            </p>
+                        </div>
+                        <!-- Remove button -->
+                        <a href="{{ url_for('cart_remove', product_id=item.product.id) }}"
+                           class="text-gray-300 hover:text-red-500 transition p-1" title="Xóa">
+                            <i class="fas fa-trash text-sm"></i>
+                        </a>
+                    </div>
+
+                    <!-- Quantity & Subtotal -->
+                    <div class="flex items-center justify-between mt-3">
+                        <form action="{{ url_for('cart_update', product_id=item.product.id) }}" method="POST" class="flex items-center gap-2">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                                <button type="submit" name="quantity" value="{{ item.quantity - 1 }}"
+                                        class="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 transition text-xs">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="px-4 py-1.5 text-sm font-medium bg-white min-w-[40px] text-center">{{ item.quantity }}</span>
+                                <button type="submit" name="quantity" value="{{ item.quantity + 1 }}"
+                                        class="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 transition text-xs">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </form>
+                        <p class="font-bold text-earth-700 text-base">{{ "{:,.0f}".format(item.subtotal) }}đ</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Continue shopping -->
+            <a href="{{ url_for('index') }}" class="inline-flex items-center gap-2 text-sm text-green-brand-600 hover:text-green-brand-800 transition font-medium mt-2">
+                <i class="fas fa-arrow-left"></i> Tiếp tục mua sắm
+            </a>
+        </div>
+
+        <!-- Order summary -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">Tóm tắt đơn hàng</h3>
+
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Tạm tính ({{ items|length }} sản phẩm)</span>
+                        <span>{{ "{:,.0f}".format(total) }}đ</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Phí vận chuyển</span>
+                        <span class="text-green-brand-600 font-medium">Miễn phí</span>
+                    </div>
+                    <hr class="border-gray-200">
+                    <div class="flex justify-between text-base font-bold">
+                        <span class="text-gray-800">Tổng cộng</span>
+                        <span class="text-green-brand-700 text-lg">{{ "{:,.0f}".format(total) }}đ</span>
+                    </div>
+                </div>
+
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('checkout') }}"
+                   class="block w-full bg-green-brand-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-green-brand-700 transition shadow-md mt-6">
+                    <i class="fas fa-credit-card mr-2"></i>Tiến hành thanh toán
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}"
+                   class="block w-full bg-green-brand-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-green-brand-700 transition shadow-md mt-6">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Đăng nhập để thanh toán
+                </a>
+                <p class="text-xs text-gray-400 text-center mt-2">
+                    Chưa có tài khoản? <a href="{{ url_for('register') }}" class="text-green-brand-600 hover:underline">Đăng ký</a>
+                </p>
+                {% endif %}
+
+                <!-- Trust -->
+                <div class="mt-5 pt-4 border-t border-gray-100 space-y-2 text-xs text-gray-400">
+                    <p><i class="fas fa-shield-halved text-green-brand-400 mr-1"></i>Thanh toán an toàn, bảo mật</p>
+                    <p><i class="fas fa-rotate-left text-green-brand-400 mr-1"></i>Đổi trả trong 24h nếu không hài lòng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty cart -->
+    <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+        <p class="text-7xl mb-4">🛒</p>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">Giỏ hàng trống</h3>
+        <p class="text-gray-400 mb-6">Hãy khám phá các nông sản tươi ngon của chúng tôi!</p>
+        <a href="{{ url_for('index') }}" class="bg-green-brand-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-brand-700 transition shadow-md">
+            <i class="fas fa-shopping-basket mr-2"></i>Mua sắm ngay
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
